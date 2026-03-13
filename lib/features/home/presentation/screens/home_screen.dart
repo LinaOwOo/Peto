@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/providers/navigation_provider.dart';
 import '../../../../core/themes/app_colors.dart';
 import '../../../../shared/widgets/mini_calendar.dart';
 import '../../../../shared/widgets/category_filter.dart';
@@ -7,22 +9,16 @@ import '../../../../shared/widgets/pet_card.dart';
 import '../../../../shared/widgets/action_buttons_row.dart';
 import '../../../../shared/widgets/bottom_nav_bar.dart';
 import '../../providers/home_provider.dart';
-import '../widgets/add_pet_dialog.dart'; // ← Добавить этот импорт
+import '../widgets/add_pet_dialog.dart';
 
-class HomeScreen extends ConsumerStatefulWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends ConsumerState<HomeScreen> {
-  int _navIndex = 0;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final homeState = ref.watch(homeProvider);
     final homeNotifier = ref.read(homeProvider.notifier);
+    final navIndex = ref.watch(navigationProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -74,7 +70,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       imageUrl: pet.imageUrl,
                       backgroundColor: pet.cardColor,
                       onTap: () {
-                        // Переход на экран питомца (добавим позже)
+                        // Переход на экран питомца
                       },
                     );
                   },
@@ -84,8 +80,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const ActionButtonsRow(),
               const SizedBox(height: 24),
               BottomNavBar(
-                selectedIndex: _navIndex,
-                onItemSelected: (index) => setState(() => _navIndex = index),
+                selectedIndex: navIndex,
+                onItemSelected: (index) => context.go(
+                  ['/home', '/care-tracker', '/calendar', '/profile'][index],
+                ),
               ),
               const SizedBox(height: 10),
             ],

@@ -26,6 +26,7 @@ class TaskList extends ConsumerWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
+      // Добавляем отступ снизу для навигационной панели
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
@@ -50,9 +51,14 @@ class TaskList extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           if (events.isEmpty)
-            Text(
-              'Нет запланированных дел',
-              style: TextStyle(color: AppColors.textGrey),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Text(
+                  'Нет запланированных дел',
+                  style: TextStyle(color: AppColors.textGrey, fontSize: 14),
+                ),
+              ),
             )
           else
             ...events.map(

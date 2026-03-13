@@ -1,53 +1,52 @@
 import 'package:equatable/equatable.dart';
 
-enum EventType { grooming, vet, medicine, other }
-
-extension EventTypeExtension on EventType {
-  String get label {
-    switch (this) {
-      case EventType.grooming:
-        return 'Груминг';
-      case EventType.vet:
-        return 'Ветеринар';
-      case EventType.medicine:
-        return 'Лекарства';
-      case EventType.other:
-        return 'Другое';
-    }
-  }
-}
-
-class CalendarEvent extends Equatable {
+class CalendarEventEntity extends Equatable {
   final String id;
   final String title;
+  final String? description;
   final DateTime date;
-  final EventType type;
   final bool isCompleted;
+  final String petId;
+  final String type;
 
-  const CalendarEvent({
+  const CalendarEventEntity({
     required this.id,
     required this.title,
+    this.description,
     required this.date,
+    required this.isCompleted,
+    required this.petId,
     required this.type,
-    this.isCompleted = false,
   });
 
-  CalendarEvent copyWith({
+  @override
+  List<Object?> get props => [
+    id,
+    title,
+    description,
+    date,
+    isCompleted,
+    petId,
+    type,
+  ];
+
+  CalendarEventEntity copyWith({
     String? id,
     String? title,
+    String? description,
     DateTime? date,
-    EventType? type,
     bool? isCompleted,
+    String? petId,
+    String? type,
   }) {
-    return CalendarEvent(
+    return CalendarEventEntity(
       id: id ?? this.id,
       title: title ?? this.title,
+      description: description ?? this.description,
       date: date ?? this.date,
-      type: type ?? this.type,
       isCompleted: isCompleted ?? this.isCompleted,
+      petId: petId ?? this.petId,
+      type: type ?? this.type,
     );
   }
-
-  @override
-  List<Object?> get props => [id, title, date, type, isCompleted];
 }

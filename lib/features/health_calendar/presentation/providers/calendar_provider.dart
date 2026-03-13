@@ -1,78 +1,43 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/calendar_event.dart';
 import '../../domain/repositories/calendar_repository.dart';
-import '../../domain/repositories/calendar_repository_impl.dart';
+import '../state/calendar_state.dart';
 
+// 🔹 Provider<> для репозитория — поддерживает overrideWithValue
 final calendarRepositoryProvider = Provider<CalendarRepository>((ref) {
-  return CalendarRepositoryImpl();
+  throw UnimplementedError('Provide repository in main.dart via overrides');
 });
 
-class CalendarState {
-  final DateTime focusedMonth;
-  final DateTime? selectedDate;
-  final List<CalendarEvent> events;
-  final bool isLoading;
-
-  CalendarState({
-    DateTime? focusedMonth,
-    this.selectedDate,
-    List<CalendarEvent>? events,
-    this.isLoading = false,
-  }) : focusedMonth =
-           focusedMonth ??
-           DateTime(DateTime.now().year, DateTime.now().month, 1),
-       events = events ?? const [];
-
-  CalendarState copyWith({
-    DateTime? focusedMonth,
-    DateTime? selectedDate,
-    List<CalendarEvent>? events,
-    bool? isLoading,
-  }) {
-    return CalendarState(
-      focusedMonth: focusedMonth ?? this.focusedMonth,
-      selectedDate: selectedDate ?? this.selectedDate,
-      events: events ?? this.events,
-      isLoading: isLoading ?? this.isLoading,
-    );
-  }
-}
-
+// 🔹 StateNotifier для бизнес-логики
 class CalendarNotifier extends StateNotifier<CalendarState> {
   final CalendarRepository _repository;
 
-  CalendarNotifier(this._repository) : super(CalendarState()) {
-    loadEvents();
+  CalendarNotifier(this._repository) : super(const CalendarState.loading()) {
+    _loadEvents(DateTime.now());
   }
 
-  Future<void> loadEvents() async {
-    state = state.copyWith(isLoading: true);
-    final events = await _repository.getEventsForMonth(state.focusedMonth);
-    state = state.copyWith(events: events, isLoading: false);
+  Future<void> _loadEvents(DateTime month) async {
+    try {
+      state = const CalendarState.loading();
+      final events = await _repository.getEventsForMonth(month);
+      state = CalendarState.success(events, focusedMonth: month);
+    } catch (e) {
+      state = CalendarState.error(e.toString());
+    }
   }
 
-  void changeMonth(DateTime month) {
-    state = state.copyWith(focusedMonth: month);
-    loadEvents();
+  Future<void> toggleCompletion(String eventId) async {
+    await _repository.toggleEventCompletion(eventId);
+    _loadEvents(state.focusedMonth ?? DateTime.now());
   }
 
-  void selectDate(DateTime date) {
-    state = state.copyWith(selectedDate: date);
-  }
-
-  Future<void> addEvent(CalendarEvent event) async {
-    await _repository.addEvent(event);
-    loadEvents();
-  }
-
-  Future<void> toggleCompletion(String id) async {
-    await _repository.toggleEventCompletion(id);
-    loadEvents();
-  }
+  void changeMonth(DateTime month) => _loadEvents(month);
+  void selectDate(DateTime date) => state = state.copyWith(selectedDate: date);
 }
 
+// 🔹 StateNotifierProvider для экрана
 final calendarProvider = StateNotifierProvider<CalendarNotifier, CalendarState>(
   (ref) {
-    return CalendarNotifier(ref.watch(calendarRepositoryProvider));
+    final repository = ref.watch(calendarRepositoryProvider);
+    return CalendarNotifier(repository);
   },
 );

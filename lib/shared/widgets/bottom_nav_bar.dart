@@ -22,6 +22,8 @@ class BottomNavBar extends StatelessWidget {
       AppIcons.profile,
     ];
 
+    final navLabels = ['Home', 'Care Tracker', 'Calendar', 'Profile'];
+
     return Container(
       margin: const EdgeInsets.all(20),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -30,9 +32,9 @@ class BottomNavBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+            color: AppColors.shadow,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -42,10 +44,21 @@ class BottomNavBar extends StatelessWidget {
           final isSelected = selectedIndex == index;
           return GestureDetector(
             onTap: () => onItemSelected(index),
-            child: AppIcon(
-              iconPath: navItems[index],
-              size: 28,
-              color: isSelected ? AppColors.primaryBright : AppColors.primary,
+            child: Semantics(
+              label: navLabels[index],
+              selected: isSelected,
+              button: true,
+              child: Container(
+                key: ValueKey('nav_item_$index'),
+                padding: const EdgeInsets.all(8),
+                child: AppIcon(
+                  iconPath: navItems[index],
+                  size: 28,
+                  color: isSelected
+                      ? AppColors.primaryBright
+                      : AppColors.primary,
+                ),
+              ),
             ),
           );
         }),

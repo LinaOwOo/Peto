@@ -1,65 +1,84 @@
-// lib/features/care_tracker/data/models/care_task_model.dart
 import '../../domain/entities/care_task_entity.dart';
 
-class CareTaskModel extends CareTaskEntity {
-  const CareTaskModel({
-    required super.id,
-    required super.type,
-    required super.title,
-    required super.iconPath,
-    required super.metrics,
-    super.lastCompleted,
-    super.nextScheduled,
-    required super.reminderInterval,
-    required super.action,
+class CareTaskModel {
+  final String id;
+  final String title;
+  final String type;
+  final String iconPath;
+  final Map<String, dynamic> metrics;
+  final int reminderIntervalSeconds;
+  final String action;
+  final DateTime createdAt;
+  final String petId;
+
+  CareTaskModel({
+    required this.id,
+    required this.title,
+    required this.type,
+    required this.iconPath,
+    required this.metrics,
+    required this.reminderIntervalSeconds,
+    required this.action,
+    required this.createdAt,
+    required this.petId,
   });
 
-  @override
-  CareTaskModel copyWith({
-    String? id,
-    CareTaskType? type,
-    String? title,
-    String? iconPath,
-    List<CareMetricEntity>? metrics,
-    DateTime? lastCompleted,
-    DateTime? nextScheduled,
-    Duration? reminderInterval,
-    CareAction? action,
-  }) {
-    return CareTaskModel(
-      id: id ?? this.id,
-      type: type ?? this.type,
-      title: title ?? this.title,
-      iconPath: iconPath ?? this.iconPath,
-      metrics: metrics ?? this.metrics,
-      lastCompleted: lastCompleted ?? this.lastCompleted,
-      nextScheduled: nextScheduled ?? this.nextScheduled,
-      reminderInterval: reminderInterval ?? this.reminderInterval,
-      action: action ?? this.action,
+  CareTaskEntity toEntity() {
+    return CareTaskEntity(
+      id: id,
+      title: title,
+      type: CareTaskType.values.firstWhere(
+        (e) => e.name == type,
+        orElse: () => CareTaskType.other,
+      ),
+      iconPath: iconPath,
+      metrics: metrics,
+      reminderInterval: Duration(seconds: reminderIntervalSeconds),
+      action: action,
+      createdAt: createdAt,
+      petId: petId,
     );
   }
-}
 
-class CareMetricModel extends CareMetricEntity {
-  const CareMetricModel({
-    required super.id,
-    required super.label,
-    required super.value,
-    required super.isCompleted,
-  });
-
-  @override
-  CareMetricModel copyWith({
-    String? id,
-    String? label,
-    String? value,
-    bool? isCompleted,
-  }) {
-    return CareMetricModel(
-      id: id ?? this.id,
-      label: label ?? this.label,
-      value: value ?? this.value,
-      isCompleted: isCompleted ?? this.isCompleted,
+  factory CareTaskModel.fromEntity(CareTaskEntity entity) {
+    return CareTaskModel(
+      id: entity.id,
+      title: entity.title,
+      type: entity.type.name,
+      iconPath: entity.iconPath,
+      metrics: entity.metrics,
+      reminderIntervalSeconds: entity.reminderInterval.inSeconds,
+      action: entity.action,
+      createdAt: entity.createdAt,
+      petId: entity.petId,
     );
+  }
+
+  factory CareTaskModel.fromJson(Map<String, dynamic> json) {
+    return CareTaskModel(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      type: json['type'] as String,
+      iconPath: json['iconPath'] as String,
+      metrics: json['metrics'] as Map<String, dynamic>? ?? {},
+      reminderIntervalSeconds: json['reminderIntervalSeconds'] as int? ?? 3600,
+      action: json['action'] as String,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      petId: json['petId'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'type': type,
+      'iconPath': iconPath,
+      'metrics': metrics,
+      'reminderIntervalSeconds': reminderIntervalSeconds,
+      'action': action,
+      'createdAt': createdAt.toIso8601String(),
+      'petId': petId,
+    };
   }
 }
